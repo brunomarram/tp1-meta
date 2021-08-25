@@ -21,6 +21,8 @@ def objective_func2(v):
     x, y = v
     return -(y + 47) * math.sin(math.sqrt((abs(x/2 + (y + 47))))) - x * math.sin(math.sqrt((abs(x - (y + 47)))))
 
+# check if a point is within the bounds of the search
+
 
 def in_bounds(point, bounds):
     # enumerate all dimensions of the point
@@ -30,11 +32,12 @@ def in_bounds(point, bounds):
             return False
     return True
 
+# hill climbing local search algorithm
 
-def hillclimbing(objective, bounds, n_iterations, step_size):
+
+def hillclimbing(objective, bounds, n_iterations, step_size, start_pt):
     # store the initial point
-    solution = bounds[:, 0] + rand(len(bounds)) * \
-        (bounds[:, 1] - bounds[:, 0])
+    solution = start_pt
     # evaluate the initial point
     solution_eval = objective(solution)
     # run the hill climb
@@ -51,6 +54,31 @@ def hillclimbing(objective, bounds, n_iterations, step_size):
             solution, solution_eval = candidate, candidte_eval
     return [solution, solution_eval]
 
+# iterated local search algorithm
+
+
+def iterated_local_search(objective, bounds, n_iter, step_size, n_restarts, p_size):
+    # define starting point
+    best = None
+    while best is None or not in_bounds(best, bounds):
+        best = bounds[:, 0] + rand(len(bounds)) * (bounds[:, 1] - bounds[:, 0])
+    # evaluate current best point
+    best_eval = objective(best)
+    # enumerate restarts
+    for n in range(n_restarts):
+        # generate an initial point as a perturbed version of the last best
+        start_pt = None
+        while start_pt is None or not in_bounds(start_pt, bounds):
+            start_pt = best + randn(len(bounds)) * p_size
+        # perform a stochastic hill climbing search
+        solution, solution_eval = hillclimbing(
+            objective, bounds, n_iter, step_size, start_pt)
+        # check for new best
+        if solution_eval < best_eval:
+            best, best_eval = solution, solution_eval
+            # print('Restart %d, best: f(%s) = %.5f' % (n, best, best_eval))
+    return [best, best_eval]
+
 
 # define range for input
 bounds = asarray([[511, 512], [404, 405]])
@@ -58,12 +86,16 @@ scores = []
 
 for i in range(0, 30):
     # define the total iterations
-    n_iterations = 10000
+    n_iter = 10000
     # define the maximum step size
-    step_size = 0.2
+    s_size = 0.2
+    # total number of random restarts
+    n_restarts = 30
+    # perturbation step size
+    p_size = 1.0
     # perform the hill climbing search
-    best, score = hillclimbing(
-        objective_func2, bounds, n_iterations, step_size)
+    best, score = iterated_local_search(
+        objective_func2, bounds, n_iter, s_size, n_restarts, p_size)
 
     print('Done!')
     print('f(%s) = %f' % (best, score))
