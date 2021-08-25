@@ -21,8 +21,6 @@ def objective_func2(v):
     x, y = v
     return -(y + 47) * math.sin(math.sqrt((abs(x/2 + (y + 47))))) - x * math.sin(math.sqrt((abs(x - (y + 47)))))
 
-# check if a point is within the bounds of the search
-
 
 def in_bounds(point, bounds):
     # enumerate all dimensions of the point
@@ -31,8 +29,6 @@ def in_bounds(point, bounds):
         if point[d] < bounds[d, 0] or point[d] > bounds[d, 1]:
             return False
     return True
-
-# hill climbing local search algorithm
 
 
 def hillclimbing(objective, bounds, n_iterations, step_size, start_pt):
@@ -53,8 +49,6 @@ def hillclimbing(objective, bounds, n_iterations, step_size, start_pt):
             # store the new point
             solution, solution_eval = candidate, candidte_eval
     return [solution, solution_eval]
-
-# iterated local search algorithm
 
 
 def iterated_local_search(objective, bounds, n_iter, step_size, n_restarts, p_size):
